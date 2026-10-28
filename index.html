@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-api-endpoint="https://bunbunserver.my.id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Technical Knowledgebase</title>
+  <link id="canonical-url" rel="canonical" href="https://bunbunserver.my.id/" />
+  <meta id="meta-robots" name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta id="meta-seo" name="description" content="Verified technical guides, diagnostic procedures, and engineering diagrams." />
+  <link rel="preconnect" href="https://bunbunserver.my.id" crossorigin="anonymous" />
+  <script>
+  (function() {
+    'use strict';
+    // Step 1 (Line 1): Immediately lock & update canonical-url at millisecond 0 before secondary tags parse
+    var canonicalEl = document.getElementById('canonical-url');
+    var htmlEl = document.documentElement;
+    var API_ENDPOINT = (htmlEl.getAttribute('data-api-endpoint') || 'https://bunbunserver.my.id').trim().replace(/\/+$/, '');
+    var loc = window.location || {};
+    var hasValidHttpOrigin = Boolean(loc.origin && loc.origin !== 'null' && /^https?:\/\//i.test(loc.origin));
+    var rawOrigin = hasValidHttpOrigin ? loc.origin.replace(/\/+$/, '') : API_ENDPOINT;
+    var rawPathname = String(loc.pathname || '/');
+    var explicitIndexFile = false;
+    var dirPath = rawPathname;
+
+    if (/\/index\.html?$/i.test(dirPath)) {
+      explicitIndexFile = true;
+      dirPath = dirPath.replace(/\/index\.html?$/i, '/');
+    } else if (/\.html?$/i.test(dirPath)) {
+      dirPath = dirPath.replace(/\/[^\/]+\.html?$/i, '/');
+    }
+
+    var customBasePath = (htmlEl.getAttribute('data-base-path') || '').trim();
+    if (customBasePath) {
+      dirPath = '/' + customBasePath.replace(/^\/+|\/+$/g, '') + '/';
+    }
+    dirPath = '/' + dirPath.replace(/^\/+|\/+$/g, '');
+    if (dirPath !== '/') {
+      dirPath = dirPath + '/';
+    }
+
+    var basePathNoTrailing = dirPath === '/' ? '' : dirPath.replace(/\/+$/, '');
+    var canonicalBaseUrl = rawOrigin + dirPath;
+    var useExplicitIndexInNav = (loc.protocol === 'file:') && explicitIndexFile;
+    var navBasePath = useExplicitIndexInNav ? (dirPath + 'index.html') : dirPath;
+    var hostname = String(loc.hostname || '').trim();
+    var isLocalOrSandbox = !hostname || hostname === 'localhost' || hostname === '127.0.0.1' || !hasValidHttpOrigin;
+    var configuredTitle = (htmlEl.getAttribute('data-site-title') || '').trim();
+    var derivedSiteTitle = configuredTitle || (!isLocalOrSandbox
+      ? hostname + (basePathNoTrailing ? ' (' + basePathNoTrailing.replace(/^\/+/, '').replace(/\//g, ' / ') + ')' : '')
+      : 'Technical Knowledgebase');
+
+    var baseCtx = {
+      hasValidHttpOrigin: hasValidHttpOrigin,
+      origin: rawOrigin,
+      hostname: hostname || 'bunbunserver.my.id',
+      dirPath: dirPath,
+      basePathNoTrailing: basePathNoTrailing,
+      canonicalBaseUrl: canonicalBaseUrl,
+      navBasePath: navBasePath,
+      siteTitle: derivedSiteTitle
+    };
+
+    function resolveRouteFromLocation() {
+      var params = new URLSearchParams(window.location.search || '');
+      var rawHash = String(window.location.hash || '').replace(/^#\/?/, '');
+      if (rawHash.indexOf('?') !== -1) {
+        var hashQuery = rawHash.split('?')[1];
+        var hashParams = new URLSearchParams(hashQuery);
+        hashParams.forEach(function(val, key) {
+          if (!params.get(key)) params.set(key, val);
+        });
+      }
+      var category = (params.get('category') || params.get('db') || '').trim();
+      var slug = (params.get('slug') || '').trim();
+      var page = (params.get('page') || params.get('view') || '').trim().toLowerCase();
+      var searchQuery = (params.get('q') || params.get('keyword') || '').trim();
+      var cleanHashName = rawHash.split('?')[0].replace(/^\/+|\/+$/g, '').toLowerCase();
+
+      if (page === 'sitemap' || cleanHashName === 'sitemap') {
+        return { pageMode: 'sitemap', category: category, slug: '', q: searchQuery };
+      }
+      if (category && slug) {
+        return { pageMode: 'article', category: category, slug: slug, q: '' };
+      }
+      if (category) {
+        return { pageMode: 'category', category: category, slug: '', q: searchQuery };
+      }
+      return { pageMode: 'home', category: '', slug: '', q: searchQuery };
+    }
+
+    function buildCanonicalForRoute(route) {
+      if (route.pageMode === 'article') {
+        return baseCtx.canonicalBaseUrl + '?category=' + encodeURIComponent(route.category) + '&slug=' + encodeURIComponent(route.slug);
+      }
+      if (route.pageMode === 'category') {
+        return baseCtx.canonicalBaseUrl + '?category=' + encodeURIComponent(route.category);
+      }
+      if (route.pageMode === 'sitemap') {
+        return baseCtx.canonicalBaseUrl + '?page=sitemap';
+      }
+      return baseCtx.canonicalBaseUrl;
+    }
+
+    function buildRelativeHrefForRoute(route) {
+      var prefix = baseCtx.navBasePath;
+      if (route.pageMode === 'article') {
+        return prefix + '?category=' + encodeURIComponent(route.category) + '&slug=' + encodeURIComponent(route.slug);
+      }
+      if (route.pageMode === 'category') {
+        var catQs = '?category=' + encodeURIComponent(route.category);
+        if (route.q) catQs += '&q=' + encodeURIComponent(route.q);
+        return prefix + catQs;
+      }
+      if (route.pageMode === 'sitemap') {
+        return prefix + '?page=sitemap';
+      }
+      if (route.q) {
+        return prefix + '?q=' + encodeURIComponent(route.q);
+      }
+      return prefix;
+    }
+
+    function buildPrimaryApiUrl(route) {
+      if (route.pageMode === 'article') {
+        return API_ENDPOINT + '/api/article?category=' + encodeURIComponent(route.category) + '&slug=' + encodeURIComponent(route.slug);
+      }
+      if (route.pageMode === 'category') {
+        var catParams = new URLSearchParams({ limit: '24' });
+        if (route.q) catParams.set('q', route.q);
+        return API_ENDPOINT + '/api/category/' + encodeURIComponent(route.category) + '?' + catParams.toString();
+      }
+      if (route.pageMode === 'sitemap') {
+        return API_ENDPOINT + '/api/articles/random?limit=60';
+      }
+      var homeParams = new URLSearchParams({ limit: '24' });
+      if (route.q) homeParams.set('q', route.q);
+      return API_ENDPOINT + '/api/articles/random?' + homeParams.toString();
+    }
+
+    var initialRoute = resolveRouteFromLocation();
+    var initialCanonical = buildCanonicalForRoute(initialRoute);
+    var initialApiUrl = buildPrimaryApiUrl(initialRoute);
+
+    // Update canonical-url immediately
+    if (canonicalEl) {
+      canonicalEl.setAttribute('href', initialCanonical);
+    }
+
+    // Priority #1 Fetch fires immediately in <head> before secondary tags parse
+    var rawFetchPromise = fetch(initialApiUrl, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      priority: 'high'
+    });
+
+    // Update initial <title> and #meta-seo synchronously based on route
+    var metaRobotsEl = document.getElementById('meta-robots');
+    var metaSeoEl = document.getElementById('meta-seo');
+    var defaultRobotsContent = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+
+    var initialHeadingText = baseCtx.siteTitle;
+    if (initialRoute.pageMode === 'article') {
+      var readableSlug = initialRoute.slug.replace(/[-_]+/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+      initialHeadingText = readableSlug;
+      document.title = readableSlug + ' - ' + baseCtx.siteTitle;
+      if (metaSeoEl) {
+        metaSeoEl.setAttribute('content', readableSlug + ' technical specification and reference diagrams on ' + baseCtx.siteTitle + '.');
+      }
+    } else if (initialRoute.pageMode === 'category') {
+      var readableCat = initialRoute.category.replace(/[-_]+/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+      initialHeadingText = readableCat;
+      document.title = readableCat + ' - ' + baseCtx.siteTitle;
+      if (metaSeoEl) {
+        metaSeoEl.setAttribute('content', 'Browse ' + readableCat + ' technical articles and diagrams on ' + baseCtx.siteTitle + '.');
+      }
+    } else if (initialRoute.pageMode === 'sitemap') {
+      initialHeadingText = 'HTML Sitemap & Technical Directory';
+      document.title = 'HTML Sitemap & Directory - ' + baseCtx.siteTitle;
+      if (metaSeoEl) {
+        metaSeoEl.setAttribute('content', 'Complete HTML sitemap, category database index, and syndication feeds for ' + baseCtx.siteTitle + '.');
+      }
+    } else {
+      document.title = baseCtx.siteTitle;
+      if (metaSeoEl) {
+        metaSeoEl.setAttribute('content', 'Explore technical guides and engineering diagrams from global databases on ' + baseCtx.siteTitle + '.');
+      }
+    }
+
+    // Step 3: Triple-Guarded Loop-Proof Image Error Fallback (Inline Raster GIF Data URI — Zero SVGDocument Forced Reflow)
+    var FALLBACK_IMG_DATA_URI = 'data:image/gif;base64,R0lGODlhAQABAIAAAPf6/AAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
+
+    window.__BUNBUN_IMG_ERR__ = function(imgEl) {
+      if (!imgEl) return;
+      // Guard 1: Dataset flag prevents re-entry
+      if (imgEl.getAttribute('data-err-guarded') === '1') return;
+      imgEl.setAttribute('data-err-guarded', '1');
+      // Guard 2: Nullify property and strip attribute so browser cannot re-fire onerror
+      imgEl.onerror = null;
+      imgEl.removeAttribute('onerror');
+      // Guard 3: Only swap src if not already set to the inline raster Data URI (preserves existing width/height/aspect-ratio box with zero layout reflow)
+      if (imgEl.src !== FALLBACK_IMG_DATA_URI) {
+        imgEl.src = FALLBACK_IMG_DATA_URI;
+      }
+    };
+
+    // Helper functions for Step 2, Step 4, and Step 6 in <head>
+    function parseJsonArrayField(primaryArr, rawJsonField) {
+      if (Array.isArray(primaryArr)) return primaryArr;
+      if (Array.isArray(rawJsonField)) return rawJsonField;
+      if (typeof rawJsonField === 'string' && rawJsonField.trim()) {
+        try {
+          var parsed = JSON.parse(rawJsonField);
+          if (Array.isArray(parsed)) return parsed;
+        } catch (e) {}
+      }
+      return [];
+    }
+
+    function toIsoDate(ts) {
+      var n = Number(ts);
+      if (!Number.isFinite(n) || n <= 0) return new Date().toISOString();
+      var ms = n < 1e11 ? n * 1000 : n;
+      var d = new Date(ms);
+      return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+    }
+
+    function removeHeadElement(id) {
+      var el = document.getElementById(id);
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+    }
+
+    function setJsonLd(id, dataObj) {
+      if (!dataObj) {
+        removeHeadElement(id);
+        return;
+      }
+      var existing = document.getElementById(id);
+      if (!existing) {
+        existing = document.createElement('script');
+        existing.type = 'application/ld+json';
+        existing.id = id;
+        document.head.appendChild(existing);
+      }
+      existing.textContent = JSON.stringify(dataObj);
+    }
+
+    // Step 4: Dynamically preconnect & preload active LCP image in <head>
+    var STATIC_PRECONNECT_HOSTS = {
+      'bunbunserver.my.id': true,
+      'fonts.googleapis.com': true,
+      'fonts.gstatic.com': true
+    };
+
+    function updateDynamicLcpPreload(lcpImageUrl) {
+      if (!lcpImageUrl || typeof lcpImageUrl !== 'string' || /^data:/i.test(lcpImageUrl)) {
+        removeHeadElement('dynamic-lcp-preconnect');
+        removeHeadElement('dynamic-lcp-preload');
+        return;
+      }
+      try {
+        var parsedUrl = new URL(lcpImageUrl, baseCtx.canonicalBaseUrl);
+        var imgOrigin = parsedUrl.origin;
+        var imgHost = parsedUrl.hostname.toLowerCase();
+
+        if (imgOrigin && /^https?:\/\//i.test(imgOrigin) && !STATIC_PRECONNECT_HOSTS[imgHost]) {
+          var preconnEl = document.getElementById('dynamic-lcp-preconnect');
+          if (!preconnEl) {
+            preconnEl = document.createElement('link');
+            preconnEl.id = 'dynamic-lcp-preconnect';
+            preconnEl.rel = 'preconnect';
+            document.head.appendChild(preconnEl);
+          }
+          preconnEl.href = imgOrigin;
+        } else {
+          removeHeadElement('dynamic-lcp-preconnect');
+        }
+
+        var preloadEl = document.getElementById('dynamic-lcp-preload');
+        if (!preloadEl) {
+          preloadEl = document.createElement('link');
+          preloadEl.id = 'dynamic-lcp-preload';
+          preloadEl.rel = 'preload';
+          preloadEl.as = 'image';
+          preloadEl.setAttribute('fetchpriority', 'high');
+          document.head.appendChild(preloadEl);
+        }
+        preloadEl.href = parsedUrl.href;
+      } catch (e) {
+        removeHeadElement('dynamic-lcp-preconnect');
+        removeHeadElement('dynamic-lcp-preload');
+      }
+    }
+
+    // Step 6: Client-side 404 / Error Head Handler (Soft 404 Prevention)
+    function applyHeadSoft404State() {
+      var rEl = document.getElementById('meta-robots');
+      if (rEl) rEl.setAttribute('content', 'noindex, nofollow');
+      var sEl = document.getElementById('meta-seo');
+      if (sEl) sEl.setAttribute('content', 'Page Not Found - ' + baseCtx.siteTitle);
+      document.title = 'Page Not Found - ' + baseCtx.siteTitle;
+      removeHeadElement('json-ld-schema');
+      removeHeadElement('json-ld-breadcrumb');
+      removeHeadElement('dynamic-lcp-preconnect');
+      removeHeadElement('dynamic-lcp-preload');
+    }
+
+    // Step 2: Pre-parse json_sentences & json_images once and hydrate <head> JSON-LD the instant API JSON arrives
+    function preParseAndHydrateHead(payload, route) {
+      if (!payload || typeof payload !== 'object' || payload.error || payload.status === 404) {
+        var err404 = new Error((payload && payload.error) ? String(payload.error) : 'HTTP 404 Not Found');
+        err404.status = 404;
+        throw err404;
+      }
+
+      var rEl = document.getElementById('meta-robots');
+      var sEl = document.getElementById('meta-seo');
+      var cEl = document.getElementById('canonical-url');
+
+      if (route.pageMode === 'article') {
+        var sentences = parseJsonArrayField(payload.sentences, payload.json_sentences);
+        var images = parseJsonArrayField(payload.images, payload.json_images);
+        if (!payload.title && !payload.slug && sentences.length === 0) {
+          var emptyErr = new Error('Article Not Found (404)');
+          emptyErr.status = 404;
+          throw emptyErr;
+        }
+
+        // Lock pre-parsed arrays on payload so <body> never re-parses JSON strings
+        payload.sentences = sentences;
+        payload.images = images;
+        payload._preParsed = true;
+
+        var catSlug = payload.category || route.category;
+        var catLabel = payload.categoryLabel || catSlug;
+        var articleSlug = payload.slug || route.slug;
+        var articleCanonicalUrl = buildCanonicalForRoute({ pageMode: 'article', category: catSlug, slug: articleSlug });
+        var categoryCanonicalUrl = buildCanonicalForRoute({ pageMode: 'category', category: catSlug });
+        var metaDesc = payload.metaDesc || payload.meta_desc || sentences.slice(0, 2).join(' ').slice(0, 157) || (payload.title + ' - ' + baseCtx.siteTitle);
+
+        document.title = payload.title + ' - ' + baseCtx.siteTitle;
+        if (cEl) cEl.setAttribute('href', articleCanonicalUrl);
+        if (rEl) rEl.setAttribute('content', defaultRobotsContent);
+        if (sEl) sEl.setAttribute('content', metaDesc);
+
+        // Dynamically preconnect & preload active LCP image (images[0]) in <head>
+        if (images.length > 0 && images[0] && images[0].url) {
+          updateDynamicLcpPreload(images[0].url);
+        } else {
+          updateDynamicLcpPreload(null);
+        }
+
+        // Build ImageObject schema array with url, contentUrl, name, caption, width, height
+        var imageObjects = images.filter(function(img) {
+          return Boolean(img && img.url);
+        }).map(function(img) {
+          var imgName = img.title || img.alt || payload.title || 'Technical Diagram';
+          var imgCaption = img.alt || img.title || payload.title || 'Technical Diagram';
+          return {
+            '@type': 'ImageObject',
+            'url': img.url,
+            'contentUrl': img.url,
+            'name': imgName,
+            'caption': imgCaption,
+            'width': Number(img.width) || 800,
+            'height': Number(img.height) || 500
+          };
+        });
+
+        var articleBodyText = sentences.join(' ').trim();
+        var wordCountVal = articleBodyText ? articleBodyText.split(/\s+/).length : 0;
+
+        // Instant <head> injection of #json-ld-schema (Article with articleBody & wordCount)
+        setJsonLd('json-ld-schema', {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          'mainEntityOfPage': {
+            '@type': 'WebPage',
+            '@id': articleCanonicalUrl
+          },
+          'headline': payload.title,
+          'description': metaDesc,
+          'image': imageObjects,
+          'articleSection': catLabel,
+          'articleBody': articleBodyText,
+          'wordCount': wordCountVal,
+          'datePublished': toIsoDate(payload.createdAt || payload.created_at),
+          'dateModified': toIsoDate(payload.updatedAt || payload.updated_at || payload.createdAt || payload.created_at),
+          'author': {
+            '@type': 'Organization',
+            'name': baseCtx.siteTitle,
+            'url': baseCtx.canonicalBaseUrl
+          },
+          'publisher': {
+            '@type': 'Organization',
+            'name': baseCtx.siteTitle,
+            'url': baseCtx.canonicalBaseUrl
+          }
+        });
+
+        // Instant <head> injection of #json-ld-breadcrumb
+        setJsonLd('json-ld-breadcrumb', {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          'itemListElement': [
+            {
+              '@type': 'ListItem',
+              'position': 1,
+              'name': 'Home',
+              'item': baseCtx.canonicalBaseUrl
+            },
+            {
+              '@type': 'ListItem',
+              'position': 2,
+              'name': catLabel,
+              'item': categoryCanonicalUrl
+            },
+            {
+              '@type': 'ListItem',
+              'position': 3,
+              'name': payload.title,
+              'item': articleCanonicalUrl
+            }
+          ]
+        });
+
+        payload._headHydrated = true;
+        return payload;
+      }
+
+      if (route.pageMode === 'category') {
+        var catArticles = Array.isArray(payload.articles) ? payload.articles : [];
+        var cSlug = payload.category || route.category;
+        var cLabel = payload.categoryLabel || cSlug.replace(/[-_]+/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+        var catCanon = buildCanonicalForRoute({ pageMode: 'category', category: cSlug });
+        var catDesc = 'Explore ' + cLabel + ' technical guides and diagrams on ' + baseCtx.siteTitle + '.';
+
+        document.title = cLabel + ' - ' + baseCtx.siteTitle;
+        if (cEl) cEl.setAttribute('href', catCanon);
+        if (rEl) rEl.setAttribute('content', defaultRobotsContent);
+        if (sEl) sEl.setAttribute('content', catDesc);
+        removeHeadElement('json-ld-schema');
+        removeHeadElement('json-ld-breadcrumb');
+
+        if (catArticles.length > 0 && (catArticles[0].thumbnail || catArticles[0].image)) {
+          updateDynamicLcpPreload(catArticles[0].thumbnail || catArticles[0].image);
+        } else {
+          updateDynamicLcpPreload(null);
+        }
+        payload._headHydrated = true;
+        return payload;
+      }
+
+      if (route.pageMode === 'sitemap') {
+        var sitemapCanon = buildCanonicalForRoute({ pageMode: 'sitemap' });
+        var sitemapDesc = 'Complete HTML Sitemap, category database directory, and XML syndication links for ' + baseCtx.siteTitle + '.';
+        document.title = 'HTML Sitemap & Directory - ' + baseCtx.siteTitle;
+        if (cEl) cEl.setAttribute('href', sitemapCanon);
+        if (rEl) rEl.setAttribute('content', defaultRobotsContent);
+        if (sEl) sEl.setAttribute('content', sitemapDesc);
+        removeHeadElement('json-ld-schema');
+        removeHeadElement('json-ld-breadcrumb');
+        updateDynamicLcpPreload(null);
+        payload._headHydrated = true;
+        return payload;
+      }
+
+      // Homepage
+      var homeArticles = Array.isArray(payload.articles) ? payload.articles : [];
+      var activeQ = route.q || payload.query || '';
+      var homeCanon = baseCtx.canonicalBaseUrl;
+      var homeDesc = 'Explore technical guides, specifications, and reference diagrams across all categories on ' + baseCtx.siteTitle + '.';
+
+      document.title = activeQ ? ('Search: ' + activeQ + ' - ' + baseCtx.siteTitle) : baseCtx.siteTitle;
+      if (cEl) cEl.setAttribute('href', homeCanon);
+      if (rEl) rEl.setAttribute('content', defaultRobotsContent);
+      if (sEl) sEl.setAttribute('content', homeDesc);
+      removeHeadElement('json-ld-breadcrumb');
+
+      if (homeArticles.length > 0 && (homeArticles[0].thumbnail || homeArticles[0].image)) {
+        updateDynamicLcpPreload(homeArticles[0].thumbnail || homeArticles[0].image);
+      } else {
+        updateDynamicLcpPreload(null);
+      }
+
+      setJsonLd('json-ld-schema', {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        'name': baseCtx.siteTitle,
+        'url': homeCanon,
+        'description': homeDesc,
+        'mainEntity': {
+          '@type': 'ItemList',
+          'itemListElement': homeArticles.slice(0, 10).map(function(item, index) {
+            return {
+              '@type': 'ListItem',
+              'position': index + 1,
+              'name': item.title,
+              'url': buildCanonicalForRoute({ pageMode: 'article', category: item.category, slug: item.slug })
+            };
+          })
+        }
+      });
+
+      payload._headHydrated = true;
+      return payload;
+    }
+
+    var dataPromise = rawFetchPromise
+      .then(function(response) {
+        if (!response.ok) {
+          var error = new Error('HTTP ' + response.status);
+          error.status = response.status;
+          throw error;
+        }
+        return response.json();
+      })
+      .then(function(payload) {
+        return preParseAndHydrateHead(payload, initialRoute);
+      })
+      .catch(function(err) {
+        // Step 6: Immediately apply Soft 404 prevention in <head> when API returns error or 404
+        applyHeadSoft404State();
+        throw err;
+      });
+
+    window.__BUNBUN_CSR__ = {
+      templateName: 'BunBun Vanilla HTML CSR (index.html)',
+      templateVersion: '1.3.0',
+      apiEndpoint: API_ENDPOINT,
+      initialHeadingText: initialHeadingText,
+      baseCtx: baseCtx,
+      homepageUrl: baseCtx.canonicalBaseUrl,
+      blogTitle: baseCtx.siteTitle,
+      blogDescription: 'Explore technical guides, specifications, and reference diagrams across all categories on ' + baseCtx.siteTitle + '.',
+      pageMode: initialRoute.pageMode,
+      category: initialRoute.category,
+      slug: initialRoute.slug,
+      q: initialRoute.q || '',
+      canonicalUrl: initialCanonical,
+      dataPromise: dataPromise,
+      fallbackImgDataUri: FALLBACK_IMG_DATA_URI,
+      resolveRouteFromLocation: resolveRouteFromLocation,
+      buildCanonicalForRoute: buildCanonicalForRoute,
+      buildRelativeHrefForRoute: buildRelativeHrefForRoute,
+      buildPrimaryApiUrl: buildPrimaryApiUrl,
+      parseJsonArrayField: parseJsonArrayField,
+      preParseAndHydrateHead: preParseAndHydrateHead,
+      applyHeadSoft404State: applyHeadSoft404State,
+      updateDynamicLcpPreload: updateDynamicLcpPreload,
+      removeHeadElement: removeHeadElement,
+      setJsonLd: setJsonLd
+    };
+  })();
+  </script>
+
+  <!-- ===================================================================== -->
+  <!-- STEP 4: SOCKET POOL DISCIPLINE (Remaining 2 of Max 3 Static Preconnects-->
+  <!--         + Static DNS-Prefetch for Image CDNs + Non-Blocking Fonts)    -->
+  <!-- ===================================================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <link rel="dns-prefetch" href="https://bunbunserver.my.id" />
+  <link rel="dns-prefetch" href="https://blogger.googleusercontent.com" />
+  <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
+  <link rel="dns-prefetch" href="https://i0.wp.com" />
+
+  <!-- Non-blocking Google Fonts via media="print" with rAF-aligned media="all" swap -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="var s=this;requestAnimationFrame(function(){s.media='all'})" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" /></noscript>
+
+  <!-- PubSubHubbub & Atom Feed Links -->
+  <link rel="hub" href="https://pubsubhubbub.appspot.com" />
+  <link id="atom-feed-link" rel="alternate" type="application/atom+xml" title="Technical Knowledgebase - Atom" href="https://bunbunserver.my.id/atom.xml" />
+
+  <!-- ===================================================================== -->
+  <!-- STEP 4: PRE-COMPILED UTILITY CSS (Zero Render-Blocking Tailwind CDN)  -->
+  <!-- ===================================================================== -->
+  <style id="precompiled-utility-css">
+    @font-face {
+      font-family: 'Inter-Fallback';
+      src: local('Arial'), local('Helvetica Neue'), local('Roboto'), local('sans-serif');
+      size-adjust: 107%;
+      ascent-override: 90%;
+      descent-override: 22%;
+      line-gap-override: 0%;
+    }
+    *, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: #e2e8f0; }
+    html { line-height: 1.5; -webkit-text-size-adjust: 100%; font-family: 'Inter', 'Inter-Fallback', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { margin: 0; padding: 0; font-family: inherit; line-height: inherit; }
+    a { color: inherit; text-decoration: inherit; }
+    button, input { font-family: inherit; font-size: 100%; font-weight: inherit; line-height: inherit; color: inherit; margin: 0; padding: 0; background-color: transparent; }
+    button { cursor: pointer; }
+    h1, h2, h3, p, figure, ul, li { margin: 0; padding: 0; }
+    ul { list-style: none; }
+    img, svg { display: block; max-width: 100%; height: auto; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+    /* Layout & Flexbox / Grid */
+    .min-h-screen { min-height: 100vh; }
+    .min-h-\[85vh\] { min-height: 85vh; }
+    .min-h-\[60vh\] { min-height: 60vh; }
+    .min-h-\[4rem\] { min-height: 4rem; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .contain-layout { contain: layout style; }
+    .flex { display: flex; }
+    .inline-flex { display: inline-flex; }
+    .inline-block { display: inline-block; }
+    .block { display: block; }
+    .hidden { display: none; }
+    .grid { display: grid; }
+    .flex-col { flex-direction: column; }
+    .flex-wrap { flex-wrap: wrap; }
+    .flex-1 { flex: 1 1 0%; }
+    .shrink-0 { flex-shrink: 0; }
+    .items-center { align-items: center; }
+    .items-start { align-items: flex-start; }
+    .justify-between { justify-content: space-between; }
+    .justify-end { justify-content: flex-end; }
+    .order-1 { order: 1; }
+    .order-2 { order: 2; }
+    .order-3 { order: 3; }
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    .col-span-full { grid-column: 1 / -1; }
+
+    /* Positioning */
+    .sticky { position: sticky; }
+    .relative { position: relative; }
+    .absolute { position: absolute; }
+    .top-0 { top: 0px; }
+    .right-2 { right: 0.5rem; }
+    .z-20 { z-index: 20; }
+
+    /* Sizing */
+    .w-full { width: 100%; }
+    .w-36 { width: 9rem; }
+    .w-20 { width: 5rem; }
+    .h-16 { height: 4rem; }
+    .h-full { height: 100%; }
+    .min-w-0 { min-width: 0px; }
+    .max-w-full { max-width: 100%; }
+    .max-w-xl { max-width: 36rem; }
+    .max-w-3xl { max-width: 48rem; }
+    .max-w-6xl { max-width: 72rem; }
+    .max-h-\[500px\] { max-height: 500px; }
+    .max-h-\[440px\] { max-height: 440px; }
+    .aspect-\[16\/10\] { aspect-ratio: 16 / 10; }
+
+    /* Spacing */
+    .mx-auto { margin-left: auto; margin-right: auto; }
+    .my-6 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+    .mt-0\.5 { margin-top: 0.125rem; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-1\.5 { margin-top: 0.375rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 0.75rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mt-6 { margin-top: 1.5rem; }
+    .mt-8 { margin-top: 2rem; }
+    .mt-12 { margin-top: 3rem; }
+    .mb-3 { margin-bottom: 0.75rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-6 { margin-bottom: 1.5rem; }
+    .p-3 { padding: 0.75rem; }
+    .p-5 { padding: 1.25rem; }
+    .p-6 { padding: 1.5rem; }
+    .p-8 { padding: 2rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .px-3\.5 { padding-left: 0.875rem; padding-right: 0.875rem; }
+    .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+    .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+    .pr-7 { padding-right: 1.75rem; }
+    .pt-3 { padding-top: 0.75rem; }
+    .pb-3 { padding-bottom: 0.75rem; }
+    .pb-4 { padding-bottom: 1rem; }
+    .pb-5 { padding-bottom: 1.25rem; }
+
+    /* Gaps & Space Between */
+    .gap-1 { gap: 0.25rem; }
+    .gap-1\.5 { gap: 0.375rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-2\.5 { gap: 0.625rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-3\.5 { gap: 0.875rem; }
+    .gap-4 { gap: 1rem; }
+    .gap-6 { gap: 1.5rem; }
+    .gap-x-6 { column-gap: 1.5rem; }
+    .gap-y-2\.5 { row-gap: 0.625rem; }
+    .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
+    .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: 2rem; }
+    .divide-y > :not([hidden]) ~ :not([hidden]) { border-top-width: 1px; }
+    .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #f1f5f9; }
+    .first\:pt-0:first-child { padding-top: 0px; }
+    .last\:pb-0:last-child { padding-bottom: 0px; }
+
+    /* Borders & Radius */
+    .border { border-width: 1px; }
+    .border-t { border-top-width: 1px; }
+    .border-b { border-bottom-width: 1px; }
+    .border-slate-100 { border-color: #f1f5f9; }
+    .border-slate-200 { border-color: #e2e8f0; }
+    .border-blue-100 { border-color: #dbeafe; }
+    .rounded { border-radius: 0.25rem; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-xl { border-radius: 0.75rem; }
+    .rounded-2xl { border-radius: 1rem; }
+    .rounded-full { border-radius: 9999px; }
+
+    /* Backgrounds & Shadows */
+    .bg-white { background-color: #ffffff; }
+    .bg-slate-50 { background-color: #f8fafc; }
+    .bg-slate-100 { background-color: #f1f5f9; }
+    .bg-slate-100\/80 { background-color: rgba(241, 245, 249, 0.8); }
+    .bg-blue-50 { background-color: #eff6ff; }
+    .bg-blue-600 { background-color: #2563eb; }
+    .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+
+    /* Typography */
+    .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .text-\[11px\] { font-size: 11px; line-height: 1.4; }
+    .text-xs { font-size: 0.75rem; line-height: 1rem; }
+    .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+    .text-base { font-size: 1rem; line-height: 1.5rem; }
+    .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+    .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+    .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .font-extrabold { font-weight: 800; }
+    .uppercase { text-transform: uppercase; }
+    .tracking-tight { letter-spacing: -0.025em; }
+    .tracking-wider { letter-spacing: 0.05em; }
+    .leading-tight { line-height: 1.25; }
+    .leading-snug { line-height: 1.375; }
+    .leading-relaxed { line-height: 1.625; }
+    .text-center { text-align: center; }
+    .whitespace-nowrap { white-space: nowrap; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .underline-offset-2 { text-underline-offset: 2px; }
+    .antialiased { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    /* Text Colors */
+    .text-white { color: #ffffff; }
+    .text-slate-400 { color: #94a3b8; }
+    .text-slate-500 { color: #64748b; }
+    .text-slate-600 { color: #475569; }
+    .text-slate-700 { color: #334155; }
+    .text-slate-800 { color: #1e293b; }
+    .text-slate-900 { color: #0f172a; }
+    .text-blue-600 { color: #2563eb; }
+    .text-blue-700 { color: #1d4ed8; }
+    .placeholder-slate-400::placeholder { color: #94a3b8; }
+
+    /* Object Fit & Overflow */
+    .object-contain { object-fit: contain; }
+    .object-cover { object-fit: cover; }
+    .overflow-hidden { overflow: hidden; }
+    .overflow-x-auto { overflow-x: auto; }
+    .cursor-pointer { cursor: pointer; }
+
+    /* Line Clamp */
+    .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+    .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .line-clamp-3 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+
+    /* Transitions & Interactive States */
+    .transition-colors { transition-property: color, background-color, border-color; transition-duration: 150ms; }
+    .transition-shadow { transition-property: box-shadow; transition-duration: 150ms; }
+    .hover\:text-blue-600:hover { color: #2563eb; }
+    .hover\:text-blue-800:hover { color: #1e40af; }
+    .hover\:bg-blue-50:hover { background-color: #eff6ff; }
+    .hover\:bg-blue-50\/60:hover { background-color: rgba(239, 246, 255, 0.6); }
+    .hover\:bg-blue-100:hover { background-color: #dbeafe; }
+    .hover\:bg-slate-50\/70:hover { background-color: rgba(248, 250, 252, 0.7); }
+    .hover\:border-blue-300:hover { border-color: #93c5fd; }
+    .hover\:underline:hover { text-decoration: underline; }
+    .hover\:shadow-md:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); }
+    .focus\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; }
+    .focus\:border-blue-500:focus { border-color: #3b82f6; }
+    .focus\:bg-white:focus { background-color: #ffffff; }
+    .group:hover .group-hover\:text-blue-600 { color: #2563eb; }
+
+    /* Responsive Breakpoints (sm: 640px, lg: 1024px) */
+    @media (min-width: 640px) {
+      .sm\:inline-flex { display: inline-flex; }
+      .sm\:flex-row { flex-direction: row; }
+      .sm\:flex-initial { flex: 0 1 auto; }
+      .sm\:items-center { align-items: center; }
+      .sm\:items-end { align-items: flex-end; }
+      .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sm\:w-52 { width: 13rem; }
+      .sm\:px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .sm\:py-10 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+      .sm\:p-8 { padding: 2rem; }
+      .sm\:p-10 { padding: 2.5rem; }
+      .sm\:text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+      .sm\:text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+      .sm\:text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+      .sm\:text-2xl { font-size: 1.5rem; line-height: 2rem; }
+      .sm\:text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+    }
+    @media (min-width: 1024px) {
+      .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .lg\:text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased">
+
+  <!-- ===================================================================== -->
+  <!-- STEP 3: MAIN CLASS FIRST IN <BODY> FOR GOOGLEBOT SINGLE-ARTICLE       -->
+  <!--         TEXT & IMAGE INDEXING                                         -->
+  <!-- ===================================================================== -->
+  <main id="app-main" role="main" class="order-2 flex-1 w-full min-h-[85vh] max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+    <article id="app-priority-content" class="max-w-3xl min-h-[60vh] mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-10">
+      <h1 id="app-initial-heading" class="text-xl sm:text-2xl font-bold text-slate-900">Technical Knowledgebase</h1>
+      <p class="mt-2 text-sm text-slate-500">Loading verified technical article text and engineering diagrams...</p>
+    </article>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- HEADER NAVIGATION (Visually top via CSS `order-1`, after <main> DOM)  -->
+  <!-- ===================================================================== -->
+  <header id="app-header" class="order-1 contain-layout bg-white border-b border-slate-200 sticky top-0 z-20 h-16 overflow-hidden">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 overflow-hidden">
+      <div class="flex items-center gap-3 shrink-0 min-w-0">
+        <a id="brand-home-link" href="#home" data-route="home" class="text-lg sm:text-xl font-extrabold text-slate-900 hover:text-blue-600 transition-colors truncate">
+          Technical Knowledgebase
+        </a>
+        <span id="base-path-badge" class="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200" title="Detected Base Path (Subdomain / Full Domain / Subfolder)">
+          /
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2.5 flex-1 sm:flex-initial justify-end min-w-0">
+        <form id="app-search-form" role="search" class="relative flex items-center">
+          <input
+            id="app-search-input"
+            type="search"
+            name="q"
+            placeholder="Search specs, sensors..."
+            aria-label="Search technical articles"
+            class="w-36 sm:w-52 px-3 py-1.5 pr-7 rounded-lg border border-slate-200 bg-slate-50 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-colors"
+          />
+          <button
+            id="app-search-submit"
+            type="submit"
+            aria-label="Submit search"
+            class="absolute right-2 text-slate-400 hover:text-blue-600 text-xs font-semibold"
+          >
+            &#8981;
+          </button>
+        </form>
+
+        <nav id="app-category-nav" aria-label="Primary Navigation" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar whitespace-nowrap text-xs sm:text-sm font-medium max-w-full">
+          <a id="nav-home-link" href="#home" data-route="home" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white font-semibold whitespace-nowrap">Home</a>
+          <a id="nav-sitemap-link" href="#sitemap" data-route="sitemap" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors whitespace-nowrap">Sitemap</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- FOOTER (Visually bottom via CSS `order-3`)                            -->
+  <!-- ===================================================================== -->
+  <footer id="app-footer" class="order-3 contain-layout bg-white border-t border-slate-200 mt-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+      <div class="flex flex-wrap items-center gap-2">
+        <a id="footer-home-link" href="#home" data-route="home" class="font-semibold text-slate-700 hover:text-blue-600">Technical Knowledgebase</a>
+        <span>&#8212; Vanilla HTML CSR (<code class="font-mono text-[11px]">index.html</code>)</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-4">
+        <a id="footer-sitemap-link" href="#sitemap" data-route="sitemap" class="font-medium text-slate-600 hover:text-blue-600 transition-colors">HTML Sitemap</a>
+        <a id="footer-xml-sitemap-link" href="https://bunbunserver.my.id/sitemap.xml?domain=all&amp;db=all" target="_blank" rel="noopener" class="font-mono text-slate-500 hover:text-blue-600 transition-colors">sitemap.xml</a>
+        <a id="footer-atom-link" href="https://bunbunserver.my.id/atom.xml?domain=all&amp;db=all" target="_blank" rel="noopener" class="font-mono text-slate-500 hover:text-blue-600 transition-colors">atom.xml</a>
+        <span id="footer-origin-label" class="font-mono text-slate-400">https://bunbunserver.my.id/</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- 5. CLIENT-SIDE RENDERING ENGINE (CRAWL11 RULES COMPLIANT)             -->
+  <!-- ===================================================================== -->
+  <script>
+  (function() {
+    'use strict';
+
+    var TW = {
+      articleContainer: 'max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-10',
+      breadcrumb: 'flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-4',
+      breadcrumbLink: 'hover:text-blue-600 underline-offset-2 hover:underline cursor-pointer',
+      categoryBadge: 'inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-blue-50 text-blue-700 mb-3 hover:bg-blue-100 transition-colors cursor-pointer',
+      articleTitle: 'text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight',
+      articleMeta: 'mt-3 pb-5 border-b border-slate-100 text-xs text-slate-500 flex flex-wrap items-center gap-3',
+      heroFigure: 'my-6 rounded-xl overflow-hidden border border-slate-200 bg-slate-50',
+      heroImg: 'w-full max-h-[500px] object-contain mx-auto block',
+      figureCaption: 'px-4 py-2.5 text-xs text-slate-600 bg-slate-100/80 border-t border-slate-200',
+      sentencesWrapper: 'mt-6 space-y-4 text-base sm:text-lg text-slate-800 leading-relaxed',
+      sentenceParagraph: 'text-slate-800 leading-relaxed',
+      inlineFigure: 'my-6 rounded-xl overflow-hidden border border-slate-200 bg-white',
+      inlineImg: 'w-full max-h-[440px] object-contain mx-auto block',
+
+      relatedSection: 'max-w-3xl mx-auto mt-8 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8',
+      relatedHeader: 'text-lg sm:text-xl font-bold text-slate-900 pb-3 mb-4 border-b border-slate-200',
+      relatedList: 'grid grid-cols-1 sm:grid-cols-2 gap-4',
+      relatedCard: 'group flex items-start gap-3.5 p-3 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-slate-50/70 transition-colors cursor-pointer',
+      relatedThumbWrap: 'w-20 h-16 rounded-lg bg-slate-100 overflow-hidden shrink-0 border border-slate-200',
+      relatedThumb: 'w-full h-full object-cover',
+      relatedBody: 'min-w-0 flex-1',
+      relatedCat: 'block text-[11px] font-semibold uppercase tracking-wider text-blue-600',
+      relatedTitle: 'mt-0.5 text-sm font-bold text-slate-900 group-hover:text-blue-600 line-clamp-2 leading-snug',
+
+      relatedLinksSection: 'max-w-3xl mx-auto mt-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8',
+      relatedLinksHeader: 'text-lg sm:text-xl font-bold text-slate-900 pb-3 mb-4 border-b border-slate-200',
+      relatedLinksList: 'divide-y divide-slate-100',
+      relatedLinksItem: 'py-2.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5',
+      relatedLinksAnchor: 'text-sm font-semibold text-slate-800 hover:text-blue-600 transition-colors line-clamp-1',
+      relatedLinksMetaWrap: 'flex items-center gap-2 shrink-0',
+      relatedLinksCatBadge: 'px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600',
+      relatedLinksDomainBadge: 'px-2 py-0.5 rounded text-[11px] font-mono text-blue-700 bg-blue-50 border border-blue-100',
+
+      sectionHeader: 'mb-6 pb-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-end justify-between gap-3',
+      sectionTitle: 'text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight',
+      sectionDesc: 'mt-1 text-sm text-slate-600',
+      postsGrid: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6',
+      postCard: 'bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col',
+      cardImgLink: 'block aspect-[16/10] bg-slate-100 overflow-hidden border-b border-slate-100 cursor-pointer',
+      cardImg: 'w-full h-full object-cover',
+      cardBody: 'p-5 flex-1 flex flex-col justify-between',
+      cardCatLink: 'text-xs font-semibold uppercase tracking-wider text-blue-600 hover:underline cursor-pointer',
+      cardTitle: 'mt-1.5 text-base sm:text-lg font-bold text-slate-900 hover:text-blue-600 line-clamp-2 cursor-pointer',
+      cardExcerpt: 'mt-2 text-xs sm:text-sm text-slate-600 line-clamp-3',
+      cardReadMore: 'mt-4 pt-3 border-t border-slate-100 text-xs font-semibold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 cursor-pointer',
+
+      sitemapContainer: 'space-y-8',
+      sitemapCard: 'bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8',
+      sitemapGroupTitle: 'text-base sm:text-lg font-bold text-slate-900 flex items-center justify-between pb-3 mb-4 border-b border-slate-200',
+      sitemapGrid: 'grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5',
+      sitemapItemLink: 'text-sm text-slate-700 hover:text-blue-600 hover:underline truncate block py-0.5 cursor-pointer',
+
+      navLink: 'px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors whitespace-nowrap cursor-pointer',
+      navLinkActive: 'px-3 py-1.5 rounded-lg bg-blue-600 text-white font-semibold whitespace-nowrap cursor-pointer'
+    };
+
+    var csr = window.__BUNBUN_CSR__ || {};
+    var baseCtx = csr.baseCtx || {
+      origin: 'https://bunbunserver.my.id',
+      hostname: 'bunbunserver.my.id',
+      dirPath: '/',
+      basePathNoTrailing: '',
+      canonicalBaseUrl: 'https://bunbunserver.my.id/',
+      navBasePath: '/'
+    };
+
+    var mainEl = document.getElementById('app-main');
+    var initialHeadingEl = document.getElementById('app-initial-heading');
+    if (initialHeadingEl && csr.initialHeadingText) {
+      initialHeadingEl.textContent = csr.initialHeadingText;
+    }
+    var navEl = document.getElementById('app-category-nav');
+    var brandLinkEl = document.getElementById('brand-home-link');
+    var basePathBadgeEl = document.getElementById('base-path-badge');
+    var searchFormEl = document.getElementById('app-search-form');
+    var searchInputEl = document.getElementById('app-search-input');
+    var footerHomeEl = document.getElementById('footer-home-link');
+    var footerSitemapEl = document.getElementById('footer-sitemap-link');
+    var footerXmlSitemapEl = document.getElementById('footer-xml-sitemap-link');
+    var footerAtomEl = document.getElementById('footer-atom-link');
+    var footerOriginEl = document.getElementById('footer-origin-label');
+    var atomHeadEl = document.getElementById('atom-feed-link');
+    var cachedCategories = [];
+    var activeArticleRenderToken = 0;
+
+    var homeRelativeHref = csr.buildRelativeHrefForRoute({ pageMode: 'home' });
+    var sitemapRelativeHref = csr.buildRelativeHrefForRoute({ pageMode: 'sitemap' });
+
+    if (brandLinkEl) {
+      brandLinkEl.setAttribute('href', homeRelativeHref);
+      brandLinkEl.textContent = csr.blogTitle;
+    }
+    if (basePathBadgeEl) {
+      basePathBadgeEl.textContent = baseCtx.dirPath;
+      basePathBadgeEl.setAttribute('title', 'Active Base URL: ' + csr.homepageUrl);
+    }
+    if (searchInputEl && csr.q && searchInputEl.value !== csr.q) {
+      searchInputEl.value = csr.q;
+    }
+    if (footerHomeEl) {
+      footerHomeEl.setAttribute('href', homeRelativeHref);
+      footerHomeEl.textContent = csr.blogTitle;
+    }
+    if (footerSitemapEl) {
+      footerSitemapEl.setAttribute('href', sitemapRelativeHref);
+    }
+
+    var syndicationDomainParam = (baseCtx.hasValidHttpOrigin && baseCtx.hostname !== 'localhost' && baseCtx.hostname !== '127.0.0.1')
+      ? encodeURIComponent(baseCtx.hostname)
+      : 'all';
+
+    if (atomHeadEl) {
+      atomHeadEl.setAttribute('href', csr.apiEndpoint + '/atom.xml?domain=' + syndicationDomainParam + '&db=all');
+      atomHeadEl.setAttribute('title', csr.blogTitle + ' - Atom 1.0 Feed');
+    }
+    if (footerXmlSitemapEl) {
+      footerXmlSitemapEl.setAttribute('href', csr.apiEndpoint + '/sitemap.xml?domain=' + syndicationDomainParam + '&db=all');
+    }
+    if (footerAtomEl) {
+      footerAtomEl.setAttribute('href', csr.apiEndpoint + '/atom.xml?domain=' + syndicationDomainParam + '&db=all');
+    }
+    if (footerOriginEl) {
+      footerOriginEl.textContent = csr.homepageUrl;
+    }
+
+    function escapeHtml(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function buildArticleHref(category, slug) {
+      return csr.buildRelativeHrefForRoute({ pageMode: 'article', category: category, slug: slug });
+    }
+
+    function buildCategoryHref(category) {
+      return csr.buildRelativeHrefForRoute({ pageMode: 'category', category: category });
+    }
+
+    function buildSitemapHref() {
+      return csr.buildRelativeHrefForRoute({ pageMode: 'sitemap' });
+    }
+
+    function buildHomeHref() {
+      return csr.buildRelativeHrefForRoute({ pageMode: 'home' });
+    }
+
+    function normalizeAllowedFrontendDomains(rawDomains) {
+      var defaultFallback = [
+        'https://fixengineslok.blogspot.com',
+        'https://machinefixex.blogspot.com',
+        'https://bunbunserver.blogspot.com',
+        'https://sveltedemo.com'
+      ];
+      if (!Array.isArray(rawDomains) || rawDomains.length === 0) {
+        return defaultFallback;
+      }
+      var apiHost = '';
+      try {
+        apiHost = new URL(csr.apiEndpoint).hostname.toLowerCase();
+      } catch (e) {}
+
+      var seen = {};
+      var validOrigins = [];
+
+      for (var i = 0; i < rawDomains.length; i++) {
+        var raw = String(rawDomains[i] || '').trim().replace(/\/+$/, '');
+        if (!raw || raw.indexOf('*') !== -1) continue;
+
+        var candidate = raw;
+        if (candidate.indexOf('http://') !== 0 && candidate.indexOf('https://') !== 0) {
+          candidate = 'https://' + candidate;
+        }
+
+        try {
+          var parsed = new URL(candidate);
+          var host = parsed.hostname.toLowerCase();
+          if (host === 'localhost' || host === '127.0.0.1' || host === apiHost) {
+            continue;
+          }
+          var origin = parsed.protocol + '//' + host + (parsed.pathname && parsed.pathname !== '/' ? parsed.pathname.replace(/\/+$/, '') : '');
+          if (!seen[origin]) {
+            seen[origin] = true;
+            validOrigins.push(origin);
+          }
+        } catch (e) {}
+      }
+
+      if (validOrigins.length === 0) {
+        return defaultFallback;
+      }
+
+      for (var j = validOrigins.length - 1; j > 0; j--) {
+        var k = Math.floor(Math.random() * (j + 1));
+        var temp = validOrigins[j];
+        validOrigins[j] = validOrigins[k];
+        validOrigins[k] = temp;
+      }
+
+      return validOrigins;
+    }
+
+    /**
+     * =========================================================================
+     * STEP 5: ELIMINATE BANDWIDTH CONTENTION AGAINST PRIMARY ARTICLE
+     *   1. Waits for all primary <article> images to finish loading or erroring
+     *      (with a 1100ms timeout cap).
+     *   2. Consolidates articles fetch into a SINGLE low-priority
+     *      GET /api/articles/random?limit=15 (priority: 'low'):
+     *      - First 10 items -> Related Posts (#article-related-posts-mount)
+     *      - Next 5 items + GET /api/domains/status (priority: 'low') -> Related Links (#article-related-links-mount)
+     * =========================================================================
+     */
+    function waitForPrimaryArticleImages(articleEl, timeoutMs) {
+      return new Promise(function(resolve) {
+        var capMs = Number(timeoutMs) > 0 ? Number(timeoutMs) : 1100;
+        var settled = false;
+        var done = function() {
+          if (settled) return;
+          settled = true;
+          resolve();
+        };
+
+        var timerId = setTimeout(done, capMs);
+
+        if (!articleEl) {
+          clearTimeout(timerId);
+          done();
+          return;
+        }
+
+        requestAnimationFrame(function() {
+          if (settled) return;
+          var imgs = Array.prototype.slice.call(articleEl.querySelectorAll('img'));
+          var pending = imgs.filter(function(img) {
+            return !img.complete;
+          });
+
+          if (pending.length === 0) {
+            clearTimeout(timerId);
+            done();
+            return;
+          }
+
+          var remaining = pending.length;
+          var onImgSettle = function() {
+            remaining -= 1;
+            if (remaining <= 0) {
+              clearTimeout(timerId);
+              done();
+            }
+          };
+
+          for (var i = 0; i < pending.length; i++) {
+            pending[i].addEventListener('load', onImgSettle, { once: true });
+            pending[i].addEventListener('error', onImgSettle, { once: true });
+          }
+        });
+      });
+    }
+
+    function renderRelatedPostsMount(relatedPostsItems) {
+      var mountEl = document.getElementById('article-related-posts-mount');
+      if (!mountEl || !Array.isArray(relatedPostsItems) || relatedPostsItems.length === 0) return;
+
+      var itemsHtml = relatedPostsItems.map(function(item) {
+        var url = buildArticleHref(item.category, item.slug);
+        var thumb = item.thumbnail || item.image || '';
+        var thumbHtml = thumb
+          ? '<div class="' + TW.relatedThumbWrap + '">' +
+              '<img alt="' + escapeHtml(item.imageAlt || item.title) + '" class="' + TW.relatedThumb + '" decoding="async" height="64" loading="lazy" onerror="window.__BUNBUN_IMG_ERR__(this)" src="' + escapeHtml(thumb) + '" width="80"/>' +
+            '</div>'
+          : '';
+
+        return (
+          '<a class="' + TW.relatedCard + '" data-route="article" data-category="' + escapeHtml(item.category) + '" data-slug="' + escapeHtml(item.slug) + '" href="' + escapeHtml(url) + '">' +
+            thumbHtml +
+            '<div class="' + TW.relatedBody + '">' +
+              '<span class="' + TW.relatedCat + '">' + escapeHtml(item.categoryLabel || item.category) + '</span>' +
+              '<h3 class="' + TW.relatedTitle + '">' + escapeHtml(item.title) + '</h3>' +
+            '</div>' +
+          '</a>'
+        );
+      }).join('');
+
+      mountEl.innerHTML =
+        '<aside aria-label="Related Posts" class="' + TW.relatedSection + '" data-component="related-posts">' +
+          '<h2 class="' + TW.relatedHeader + '">Related Posts</h2>' +
+          '<div class="' + TW.relatedList + '">' +
+            itemsHtml +
+          '</div>' +
+        '</aside>';
+    }
+
+    function renderRelatedLinksMount(relatedLinksItems, domainsData) {
+      var mountEl = document.getElementById('article-related-links-mount');
+      if (!mountEl || !Array.isArray(relatedLinksItems) || relatedLinksItems.length === 0) return;
+
+      var rawDomains = (domainsData && Array.isArray(domainsData.activeHttp200Domains))
+        ? domainsData.activeHttp200Domains
+        : [];
+      var domainPool = normalizeAllowedFrontendDomains(rawDomains);
+
+      var linksHtml = relatedLinksItems.map(function(item, idx) {
+        var targetOrigin = String(domainPool[idx % domainPool.length] || csr.homepageUrl).replace(/\/+$/, '');
+        var crossDomainHref = targetOrigin + '/?category=' + encodeURIComponent(item.category) + '&slug=' + encodeURIComponent(item.slug);
+        var hostLabel = targetOrigin.replace(/^https?:\/\//, '');
+
+        return (
+          '<li class="' + TW.relatedLinksItem + '">' +
+            '<a class="' + TW.relatedLinksAnchor + '" href="' + escapeHtml(crossDomainHref) + '" target="_blank" rel="noopener">' +
+              escapeHtml(item.title) +
+            '</a>' +
+            '<div class="' + TW.relatedLinksMetaWrap + '">' +
+              '<span class="' + TW.relatedLinksCatBadge + '">' + escapeHtml(item.categoryLabel || item.category) + '</span>' +
+              '<span class="' + TW.relatedLinksDomainBadge + '">' + escapeHtml(hostLabel) + '</span>' +
+            '</div>' +
+          '</li>'
+        );
+      }).join('');
+
+      mountEl.innerHTML =
+        '<aside aria-label="Related Links Across All Categories and Domains" class="' + TW.relatedLinksSection + '" data-component="related-links">' +
+          '<h2 class="' + TW.relatedLinksHeader + '">Related Links</h2>' +
+          '<ul class="' + TW.relatedLinksList + '">' +
+            linksHtml +
+          '</ul>' +
+        '</aside>';
+    }
+
+    function scheduleSecondaryArticleFetchesGated(articleEl, currentSlug, renderToken) {
+      waitForPrimaryArticleImages(articleEl, 1100).then(function() {
+        if (renderToken !== activeArticleRenderToken || csr.pageMode !== 'article') return;
+
+        var lowPriorityOpts = {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          priority: 'low'
+        };
+
+        // Single consolidated low-priority GET /api/articles/random?limit=15 paired with GET /api/domains/status
+        Promise.all([
+          fetch(csr.apiEndpoint + '/api/articles/random?limit=15', lowPriorityOpts)
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .catch(function() { return null; }),
+          fetch(csr.apiEndpoint + '/api/domains/status', lowPriorityOpts)
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .catch(function() { return null; })
+        ]).then(function(results) {
+          if (renderToken !== activeArticleRenderToken || csr.pageMode !== 'article') return;
+          var randomData = results[0];
+          var domainsData = results[1];
+          if (!randomData || !Array.isArray(randomData.articles)) return;
+
+          var allItems = randomData.articles.filter(function(item) {
+            return item && item.slug && item.slug !== currentSlug;
+          });
+          if (allItems.length === 0 && randomData.articles.length > 0) {
+            allItems = randomData.articles.slice();
+          }
+
+          // First 10 items -> Related Posts; Next 5 items -> Related Links
+          var relatedPostsSlice = allItems.slice(0, 10);
+          var relatedLinksSlice = allItems.slice(10, 15);
+
+          requestAnimationFrame(function() {
+            if (renderToken !== activeArticleRenderToken || csr.pageMode !== 'article') return;
+            renderRelatedPostsMount(relatedPostsSlice);
+            renderRelatedLinksMount(relatedLinksSlice, domainsData);
+          });
+        });
+      });
+    }
+
+    /**
+     * =========================================================================
+     * PAGE 1: SINGLE ARTICLE PAGE (`/?category=<category>&slug=<slug>`)
+     *   - Uses pre-parsed sentences & images from <head> (no double parsing)
+     *   - Forces loading="eager" decoding="async" + window.__BUNBUN_IMG_ERR__
+     *     on 100% of json_images so Googlebot's non-scrolling Chromium indexes all images
+     *   - Gates Related Posts & Related Links behind primary <article> image completion (1100ms cap)
+     * =========================================================================
+     */
+    function renderSingleArticle(article) {
+      activeArticleRenderToken += 1;
+      var currentToken = activeArticleRenderToken;
+
+      // Ensure <head> SEO & JSON-LD were hydrated once (no double JSON-LD)
+      if (!article._headHydrated) {
+        csr.preParseAndHydrateHead(article, {
+          pageMode: 'article',
+          category: article.category || csr.category,
+          slug: article.slug || csr.slug,
+          q: ''
+        });
+      }
+
+      var sentences = Array.isArray(article.sentences)
+        ? article.sentences
+        : csr.parseJsonArrayField(article.sentences, article.json_sentences);
+      var images = Array.isArray(article.images)
+        ? article.images
+        : csr.parseJsonArrayField(article.images, article.json_images);
+
+      var catSlug = article.category || csr.category;
+      var catLabel = article.categoryLabel || catSlug;
+      var articleSlug = article.slug || csr.slug;
+      var categoryHref = buildCategoryHref(catSlug);
+      var homeHref = buildHomeHref();
+
+      // Step 3: 100% of json_images use loading="eager" decoding="async" + onerror="window.__BUNBUN_IMG_ERR__(this)"
+      var heroHtml = '';
+      if (images.length > 0 && images[0] && images[0].url) {
+        var firstImg = images[0];
+        var hWidth = Number(firstImg.width) || 800;
+        var hHeight = Number(firstImg.height) || 500;
+        heroHtml =
+          '<figure class="' + TW.heroFigure + '">' +
+            '<img alt="' + escapeHtml(firstImg.alt || article.title) + '" class="' + TW.heroImg + '" decoding="async" fetchpriority="high" height="' + hHeight + '" loading="eager" onerror="window.__BUNBUN_IMG_ERR__(this)" src="' + escapeHtml(firstImg.url) + '" style="aspect-ratio: ' + hWidth + ' / ' + hHeight + ';" width="' + hWidth + '"/>' +
+            '<figcaption class="' + TW.figureCaption + '">' + escapeHtml(firstImg.title || firstImg.alt || article.title) + '</figcaption>' +
+          '</figure>';
+      }
+
+      var paragraphs = [];
+      for (var i = 0; i < sentences.length; i += 3) {
+        paragraphs.push(sentences.slice(i, i + 3).join(' '));
+      }
+
+      var extraImages = images.slice(1);
+      var imgIndex = 0;
+      var imgStride = extraImages.length > 0
+        ? Math.max(2, Math.floor(paragraphs.length / (extraImages.length + 1)))
+        : 999999;
+
+      var contentBlocks = [];
+      for (var p = 0; p < paragraphs.length; p++) {
+        contentBlocks.push('<p class="' + TW.sentenceParagraph + '">' + escapeHtml(paragraphs[p]) + '</p>');
+
+        if (imgIndex < extraImages.length && ((p + 1) % imgStride === 0)) {
+          var diag = extraImages[imgIndex++];
+          if (diag && diag.url) {
+            var dW = Number(diag.width) || 700;
+            var dH = Number(diag.height) || 440;
+            contentBlocks.push(
+              '<figure class="' + TW.inlineFigure + '">' +
+                '<img alt="' + escapeHtml(diag.alt || diag.title || article.title) + '" class="' + TW.inlineImg + '" decoding="async" fetchpriority="low" height="' + dH + '" loading="eager" onerror="window.__BUNBUN_IMG_ERR__(this)" src="' + escapeHtml(diag.url) + '" style="aspect-ratio: ' + dW + ' / ' + dH + ';" width="' + dW + '"/>' +
+                '<figcaption class="' + TW.figureCaption + '">' + escapeHtml(diag.title || diag.alt || article.title) + '</figcaption>' +
+              '</figure>'
+            );
+          }
+        }
+      }
+
+      while (imgIndex < extraImages.length) {
+        var remImg = extraImages[imgIndex++];
+        if (remImg && remImg.url) {
+          var rW = Number(remImg.width) || 700;
+          var rH = Number(remImg.height) || 440;
+          contentBlocks.push(
+            '<figure class="' + TW.inlineFigure + '">' +
+              '<img alt="' + escapeHtml(remImg.alt || remImg.title || article.title) + '" class="' + TW.inlineImg + '" decoding="async" fetchpriority="low" height="' + rH + '" loading="eager" onerror="window.__BUNBUN_IMG_ERR__(this)" src="' + escapeHtml(remImg.url) + '" style="aspect-ratio: ' + rW + ' / ' + rH + ';" width="' + rW + '"/>' +
+              '<figcaption class="' + TW.figureCaption + '">' + escapeHtml(remImg.title || remImg.alt || article.title) + '</figcaption>' +
+            '</figure>'
+          );
+        }
+      }
+
+      // Batch navEl.innerHTML and mainEl.innerHTML DOM writes together
+      if (navEl) {
+        navEl.innerHTML =
+          '<a class="' + TW.navLink + '" data-route="home" href="' + escapeHtml(buildHomeHref()) + '">Home</a>' +
+          '<a class="' + TW.navLink + '" data-route="sitemap" href="' + escapeHtml(buildSitemapHref()) + '">Sitemap</a>';
+      }
+
+      mainEl.innerHTML =
+        '<article id="app-priority-content" class="' + TW.articleContainer + '">' +
+          '<nav aria-label="Breadcrumb" class="' + TW.breadcrumb + '">' +
+            '<a class="' + TW.breadcrumbLink + '" data-route="home" href="' + escapeHtml(homeHref) + '">Home</a>' +
+            '<span>/</span>' +
+            '<a class="' + TW.breadcrumbLink + '" data-route="category" data-category="' + escapeHtml(catSlug) + '" href="' + escapeHtml(categoryHref) + '">' + escapeHtml(catLabel) + '</a>' +
+            '<span>/</span>' +
+            '<span aria-current="page" class="text-slate-800 font-semibold">' + escapeHtml(article.title) + '</span>' +
+          '</nav>' +
+          '<header>' +
+            '<a class="' + TW.categoryBadge + '" data-route="category" data-category="' + escapeHtml(catSlug) + '" href="' + escapeHtml(categoryHref) + '">' + escapeHtml(catLabel) + '</a>' +
+            '<h1 class="' + TW.articleTitle + '">' + escapeHtml(article.title) + '</h1>' +
+          '</header>' +
+          heroHtml +
+          '<div class="' + TW.sentencesWrapper + '" id="article-json-sentences">' +
+            contentBlocks.join('') +
+          '</div>' +
+        '</article>' +
+        '<div id="article-related-posts-mount" class="contain-layout"></div>' +
+        '<div id="article-related-links-mount" class="contain-layout"></div>';
+
+      // Step 5: Gate Related Posts & Related Links behind primary <article> image completion (1100ms timeout cap)
+      var primaryArticleEl = document.getElementById('app-priority-content');
+      scheduleSecondaryArticleFetchesGated(primaryArticleEl, articleSlug, currentToken);
+    }
+
+    function buildPostCardHtml(post, idx) {
+      var postHref = buildArticleHref(post.category, post.slug);
+      var catHref = buildCategoryHref(post.category);
+      var imgUrl = post.thumbnail || post.image || '';
+      var isEagerRow = idx < 3;
+      var isLcpCard = idx === 0;
+
+      var imageBlock = imgUrl
+        ? '<a class="' + TW.cardImgLink + '" data-route="article" data-category="' + escapeHtml(post.category) + '" data-slug="' + escapeHtml(post.slug) + '" href="' + escapeHtml(postHref) + '">' +
+            '<img alt="' + escapeHtml(post.imageAlt || post.title) + '" class="' + TW.cardImg + '" decoding="async" fetchpriority="' + (isLcpCard ? 'high' : 'auto') + '" height="400" loading="' + (isEagerRow ? 'eager' : 'lazy') + '" onerror="window.__BUNBUN_IMG_ERR__(this)" src="' + escapeHtml(imgUrl) + '" style="aspect-ratio: 640 / 400;" width="640"/>' +
+          '</a>'
+        : '';
+
+      return (
+        '<article class="' + TW.postCard + '">' +
+          imageBlock +
+          '<div class="' + TW.cardBody + '">' +
+            '<div>' +
+              '<a class="' + TW.cardCatLink + '" data-route="category" data-category="' + escapeHtml(post.category) + '" href="' + escapeHtml(catHref) + '">' + escapeHtml(post.categoryLabel || post.category) + '</a>' +
+              '<h2 class="' + TW.cardTitle + '">' +
+                '<a data-route="article" data-category="' + escapeHtml(post.category) + '" data-slug="' + escapeHtml(post.slug) + '" href="' + escapeHtml(postHref) + '">' + escapeHtml(post.title) + '</a>' +
+              '</h2>' +
+              '<p class="' + TW.cardExcerpt + '">' + escapeHtml(post.excerpt || '') + '</p>' +
+            '</div>' +
+            '<a class="' + TW.cardReadMore + '" data-route="article" data-category="' + escapeHtml(post.category) + '" data-slug="' + escapeHtml(post.slug) + '" href="' + escapeHtml(postHref) + '">Read article &#8594;</a>' +
+          '</div>' +
+        '</article>'
+      );
+    }
+
+    function renderHomepage(data) {
+      activeArticleRenderToken += 1;
+      if (!data._headHydrated) {
+        csr.preParseAndHydrateHead(data, { pageMode: 'home', category: '', slug: '', q: csr.q });
+      }
+
+      var articles = (data && Array.isArray(data.articles)) ? data.articles : [];
+      var activeQuery = csr.q || (data && data.query) || '';
+
+      var cardsHtml = articles.length > 0
+        ? articles.map(function(post, idx) {
+            return buildPostCardHtml(post, idx);
+          }).join('')
+        : '<div class="col-span-full bg-white rounded-xl border border-slate-200 p-8 text-center text-sm text-slate-600">' +
+            'No matching technical articles found' + (activeQuery ? ' for "' + escapeHtml(activeQuery) + '"' : '') + '.' +
+          '</div>';
+
+      var subtitleText = activeQuery
+        ? 'Search results for "' + escapeHtml(activeQuery) + '" across global category databases.'
+        : 'Browse technical guides and reference diagrams from global databases.';
+
+      var clearSearchHtml = activeQuery
+        ? '<a class="text-xs font-semibold text-blue-600 hover:underline cursor-pointer" data-route="home" href="' + escapeHtml(buildHomeHref()) + '">Clear search &#10005;</a>'
+        : '';
+
+      mainEl.innerHTML =
+        '<section>' +
+          '<header class="' + TW.sectionHeader + '">' +
+            '<div>' +
+              '<h1 class="' + TW.sectionTitle + '">' + escapeHtml(csr.blogTitle) + '</h1>' +
+              '<p class="' + TW.sectionDesc + '">' + subtitleText + '</p>' +
+            '</div>' +
+            clearSearchHtml +
+          '</header>' +
+          '<div class="' + TW.postsGrid + '">' + cardsHtml + '</div>' +
+        '</section>';
+    }
+
+    function renderCategoryPage(data) {
+      activeArticleRenderToken += 1;
+      if (!data._headHydrated) {
+        csr.preParseAndHydrateHead(data, { pageMode: 'category', category: csr.category, slug: '', q: csr.q });
+      }
+
+      var articles = (data && Array.isArray(data.articles)) ? data.articles : [];
+      var catSlug = (data && data.category) || csr.category;
+      var catLabel = (data && data.categoryLabel) || catSlug.replace(/[-_]+/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+      var catDesc = 'Explore ' + catLabel + ' technical guides and diagrams on ' + csr.blogTitle + '.';
+
+      var cardsHtml = articles.map(function(post, idx) {
+        return buildPostCardHtml(post, idx);
+      }).join('');
+
+      mainEl.innerHTML =
+        '<section>' +
+          '<header class="' + TW.sectionHeader + '">' +
+            '<div>' +
+              '<h1 class="' + TW.sectionTitle + '">' + escapeHtml(catLabel) + '</h1>' +
+              '<p class="' + TW.sectionDesc + '">' + escapeHtml(catDesc) + '</p>' +
+            '</div>' +
+            '<a class="text-xs font-semibold text-blue-600 hover:underline cursor-pointer" data-route="home" href="' + escapeHtml(buildHomeHref()) + '">&#8592; All Categories</a>' +
+          '</header>' +
+          '<div class="' + TW.postsGrid + '">' + cardsHtml + '</div>' +
+        '</section>';
+    }
+
+    function renderSitemapPage(data) {
+      activeArticleRenderToken += 1;
+      if (!data._headHydrated) {
+        csr.preParseAndHydrateHead(data, { pageMode: 'sitemap', category: '', slug: '', q: '' });
+      }
+
+      var articles = (data && Array.isArray(data.articles)) ? data.articles : [];
+      var categories = (data && Array.isArray(data.categories) && data.categories.length > 0)
+        ? data.categories
+        : cachedCategories;
+
+      var grouped = {};
+      for (var i = 0; i < articles.length; i++) {
+        var art = articles[i];
+        if (!art || !art.category || !art.slug) continue;
+        if (!grouped[art.category]) {
+          grouped[art.category] = {
+            category: art.category,
+            label: art.categoryLabel || art.category,
+            items: []
+          };
+        }
+        grouped[art.category].items.push(art);
+      }
+
+      var categoryBadgesHtml = categories.length > 0
+        ? '<div class="flex flex-wrap gap-2.5">' +
+            categories.map(function(c) {
+              var catHref = buildCategoryHref(c.category);
+              return (
+                '<a class="px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:border-blue-300 hover:bg-blue-50/60 transition-colors flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800 cursor-pointer" data-route="category" data-category="' + escapeHtml(c.category) + '" href="' + escapeHtml(catHref) + '">' +
+                  '<span>' + escapeHtml(c.label || c.category) + '</span>' +
+                  (c.count ? '<span class="px-2 py-0.5 rounded-full text-[11px] font-mono bg-white border border-slate-200 text-slate-500">' + Number(c.count) + '</span>' : '') +
+                '</a>'
+              );
+            }).join('') +
+          '</div>'
+        : '<p class="text-sm text-slate-500">All active category databases are listed below.</p>';
+
+      var groupKeys = Object.keys(grouped).sort();
+      var groupedSectionsHtml = groupKeys.map(function(catKey) {
+        var group = grouped[catKey];
+        var catHref = buildCategoryHref(group.category);
+        var linksHtml = group.items.map(function(item) {
+          var itemHref = buildArticleHref(item.category, item.slug);
+          return (
+            '<li>' +
+              '<a class="' + TW.sitemapItemLink + '" data-route="article" data-category="' + escapeHtml(item.category) + '" data-slug="' + escapeHtml(item.slug) + '" href="' + escapeHtml(itemHref) + '">' +
+                escapeHtml(item.title) +
+              '</a>' +
+            '</li>'
+          );
+        }).join('');
+
+        return (
+          '<section class="' + TW.sitemapCard + '">' +
+            '<div class="' + TW.sitemapGroupTitle + '">' +
+              '<a class="hover:text-blue-600 transition-colors cursor-pointer" data-route="category" data-category="' + escapeHtml(group.category) + '" href="' + escapeHtml(catHref) + '">' +
+                escapeHtml(group.label) +
+              '</a>' +
+              '<a class="text-xs font-semibold text-blue-600 hover:underline cursor-pointer" data-route="category" data-category="' + escapeHtml(group.category) + '" href="' + escapeHtml(catHref) + '">' +
+                'View category &#8594;' +
+              '</a>' +
+            '</div>' +
+            '<ul class="' + TW.sitemapGrid + '">' +
+              linksHtml +
+            '</ul>' +
+          '</section>'
+        );
+      }).join('');
+
+      var xmlSitemapUrl = csr.apiEndpoint + '/sitemap.xml?domain=' + syndicationDomainParam + '&db=all';
+      var atomFeedUrl = csr.apiEndpoint + '/atom.xml?domain=' + syndicationDomainParam + '&db=all';
+
+      mainEl.innerHTML =
+        '<div class="' + TW.sitemapContainer + '" data-component="sitemap-page">' +
+          '<header class="' + TW.sectionHeader + '">' +
+            '<div>' +
+              '<h1 class="' + TW.sectionTitle + '">HTML Sitemap &amp; Technical Directory</h1>' +
+              '<p class="' + TW.sectionDesc + '">Browse all categories, indexed technical guides, and XML syndication feeds for <code class="font-mono text-xs">' + escapeHtml(csr.homepageUrl) + '</code>.</p>' +
+            '</div>' +
+            '<div class="flex flex-wrap items-center gap-2 text-xs font-mono">' +
+              '<a class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:border-blue-300 hover:text-blue-600 transition-colors" href="' + escapeHtml(xmlSitemapUrl) + '" target="_blank" rel="noopener">sitemap.xml</a>' +
+              '<a class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:border-blue-300 hover:text-blue-600 transition-colors" href="' + escapeHtml(atomFeedUrl) + '" target="_blank" rel="noopener">atom.xml</a>' +
+            '</div>' +
+          '</header>' +
+          '<section class="' + TW.sitemapCard + '">' +
+            '<h2 class="' + TW.sitemapGroupTitle + '">Category Databases</h2>' +
+            categoryBadgesHtml +
+          '</section>' +
+          groupedSectionsHtml +
+        '</div>';
+    }
+
+    /**
+     * =========================================================================
+     * STEP 6: CLIENT-SIDE 404 / ERROR HANDLING (SOFT 404 PREVENTION)
+     *   - Sets <meta name="robots" content="noindex, nofollow">
+     *   - Updates document.title = 'Page Not Found - ' + csr.blogTitle
+     *   - Removes #json-ld-schema and #json-ld-breadcrumb from <head>
+     * =========================================================================
+     */
+    function render404NotFoundState() {
+      activeArticleRenderToken += 1;
+      csr.applyHeadSoft404State();
+      document.title = 'Page Not Found - ' + csr.blogTitle;
+
+      mainEl.innerHTML =
+        '<section class="max-w-xl mx-auto bg-white rounded-2xl border border-slate-200 p-8 text-center" data-component="error-404">' +
+          '<h1 class="text-xl sm:text-2xl font-bold text-slate-900">Page Not Found (404)</h1>' +
+          '<p class="mt-2 text-sm text-slate-600">The requested technical article or category could not be found on ' + escapeHtml(csr.apiEndpoint) + '.</p>' +
+          '<a class="mt-4 inline-block px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold cursor-pointer" data-route="home" href="' + escapeHtml(buildHomeHref()) + '">Back to Home</a>' +
+        '</section>';
+    }
+
+    function renderCategoryNavPills(categories) {
+      if (Array.isArray(categories) && categories.length > 0) {
+        cachedCategories = categories;
+      }
+      if (!navEl) return;
+
+      if (csr.pageMode === 'article') {
+        navEl.innerHTML =
+          '<a class="' + TW.navLink + '" data-route="home" href="' + escapeHtml(buildHomeHref()) + '">Home</a>' +
+          '<a class="' + TW.navLink + '" data-route="sitemap" href="' + escapeHtml(buildSitemapHref()) + '">Sitemap</a>';
+        return;
+      }
+
+      var activeCat = (csr.category || '').toLowerCase();
+      var isHome = csr.pageMode === 'home' && !activeCat;
+      var isSitemap = csr.pageMode === 'sitemap';
+
+      var links = [
+        '<a class="' + (isHome ? TW.navLinkActive : TW.navLink) + '" data-route="home" href="' + escapeHtml(buildHomeHref()) + '">Home</a>',
+        '<a class="' + (isSitemap ? TW.navLinkActive : TW.navLink) + '" data-route="sitemap" href="' + escapeHtml(buildSitemapHref()) + '">Sitemap</a>'
+      ];
+
+      for (var i = 0; i < cachedCategories.length; i++) {
+        var c = cachedCategories[i];
+        if (!c || !c.category) continue;
+        var isCurrent = csr.pageMode === 'category' && activeCat === String(c.category).toLowerCase();
+        links.push(
+          '<a class="' + (isCurrent ? TW.navLinkActive : TW.navLink) + '" data-route="category" data-category="' + escapeHtml(c.category) + '" href="' + escapeHtml(buildCategoryHref(c.category)) + '">' +
+            escapeHtml(c.label || c.category) +
+          '</a>'
+        );
+      }
+      navEl.innerHTML = links.join('');
+    }
+
+    function ensureCategoriesLoadedDeferred() {
+      if (csr.pageMode === 'article') return;
+      if (cachedCategories.length > 0) {
+        renderCategoryNavPills(cachedCategories);
+        return;
+      }
+      fetch(csr.apiEndpoint + '/api/categories', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        priority: 'low'
+      })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .catch(function() { return null; })
+        .then(function(data) {
+          if (data && Array.isArray(data.categories)) {
+            renderCategoryNavPills(data.categories);
+          }
+        });
+    }
+
+    function renderPayloadForCurrentMode(payload) {
+      if (!payload || typeof payload !== 'object' || payload.error || payload.status === 404) {
+        render404NotFoundState();
+        return;
+      }
+      if (Array.isArray(payload.categories) && payload.categories.length > 0) {
+        cachedCategories = payload.categories;
+      }
+      if (csr.pageMode === 'article') {
+        renderSingleArticle(payload);
+      } else if (csr.pageMode === 'category') {
+        renderCategoryPage(payload);
+        ensureCategoriesLoadedDeferred();
+      } else if (csr.pageMode === 'sitemap') {
+        renderSitemapPage(payload);
+        ensureCategoriesLoadedDeferred();
+      } else {
+        renderHomepage(payload);
+        renderCategoryNavPills(cachedCategories);
+      }
+    }
+
+    function navigateToRoute(newRoute, pushHistory) {
+      csr.pageMode = newRoute.pageMode;
+      csr.category = newRoute.category || '';
+      csr.slug = newRoute.slug || '';
+      csr.q = newRoute.q || '';
+      csr.canonicalUrl = csr.buildCanonicalForRoute(newRoute);
+
+      window.scrollTo(0, 0);
+
+      if (searchInputEl && searchInputEl.value !== csr.q) {
+        searchInputEl.value = csr.q;
+      }
+
+      var cEl = document.getElementById('canonical-url');
+      if (cEl) cEl.setAttribute('href', csr.canonicalUrl);
+
+      if (pushHistory) {
+        var targetRelativeHref = csr.buildRelativeHrefForRoute(newRoute);
+        try {
+          window.history.pushState(newRoute, '', targetRelativeHref);
+        } catch (e) {
+          try {
+            window.location.hash = targetRelativeHref.replace(/^[^?]*\?/, '?');
+          } catch (hashErr) {}
+        }
+      }
+
+      var endpointUrl = csr.buildPrimaryApiUrl(newRoute);
+      fetch(endpointUrl, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        priority: 'high'
+      })
+        .then(function(res) {
+          if (!res.ok) {
+            var err = new Error('HTTP ' + res.status);
+            err.status = res.status;
+            throw err;
+          }
+          return res.json();
+        })
+        .then(function(payload) {
+          var hydrated = csr.preParseAndHydrateHead(payload, newRoute);
+          renderPayloadForCurrentMode(hydrated);
+        })
+        .catch(function() {
+          render404NotFoundState();
+        });
+    }
+
+    if (searchFormEl) {
+      searchFormEl.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var qVal = searchInputEl ? String(searchInputEl.value || '').trim() : '';
+        var targetMode = csr.pageMode === 'category' && csr.category ? 'category' : 'home';
+        navigateToRoute({
+          pageMode: targetMode,
+          category: targetMode === 'category' ? csr.category : '',
+          slug: '',
+          q: qVal
+        }, true);
+      });
+    }
+
+    document.addEventListener('click', function(e) {
+      var anchor = e.target && e.target.closest ? e.target.closest('a[data-route]') : null;
+      if (!anchor) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+      var routeType = anchor.getAttribute('data-route');
+      if (!routeType) return;
+
+      e.preventDefault();
+      if (routeType === 'article') {
+        navigateToRoute({
+          pageMode: 'article',
+          category: anchor.getAttribute('data-category') || '',
+          slug: anchor.getAttribute('data-slug') || '',
+          q: ''
+        }, true);
+      } else if (routeType === 'category') {
+        navigateToRoute({
+          pageMode: 'category',
+          category: anchor.getAttribute('data-category') || '',
+          slug: '',
+          q: ''
+        }, true);
+      } else if (routeType === 'sitemap') {
+        navigateToRoute({
+          pageMode: 'sitemap',
+          category: '',
+          slug: '',
+          q: ''
+        }, true);
+      } else {
+        navigateToRoute({
+          pageMode: 'home',
+          category: '',
+          slug: '',
+          q: ''
+        }, true);
+      }
+    });
+
+    window.addEventListener('popstate', function() {
+      var route = csr.resolveRouteFromLocation();
+      navigateToRoute(route, false);
+    });
+
+    // Execute initial Priority #1 Rendering Pipeline
+    if (csr.dataPromise) {
+      csr.dataPromise
+        .then(function(payload) {
+          renderPayloadForCurrentMode(payload);
+        })
+        .catch(function() {
+          render404NotFoundState();
+        });
+    }
+  })();
+  </script>
+<script src='https://cdn.jsdelivr.net/gh/luqmanthinkpad/csrnew/gem.js'></script>
+</body>
+</html>
